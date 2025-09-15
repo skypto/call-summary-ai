@@ -1,0 +1,24 @@
+[build]
+  publish = "demo"
+  command = "echo 'No build step required for static demo'"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[redirects]]
+  from = "/download/*"
+  to = "https://github.com/yourusername/call-summary-ai/releases/latest"
+  status = 302
+
+[[redirects]]
+  from = "/github"
+  to = "https://github.com/yourusername/call-summary-ai"
+  status = 302

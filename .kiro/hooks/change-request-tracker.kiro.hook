@@ -1,0 +1,22 @@
+{
+  "enabled": true,
+  "name": "Change Request Tracker",
+  "description": "Monitors for new change requests after task implementation, records them in a shared markdown file, and stops tracking when moving to the next task in specs file",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "**/*.js",
+      "**/*.html",
+      "**/*.css",
+      "**/*.md",
+      "**/*.json",
+      "package.json",
+      "README.md"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A file has been modified. Check if this represents a new change request after a task has been implemented. If so, record it as a brief note in a shared markdown file called 'change-requests.md'. Monitor the specs file to determine when to stop tracking for the current task and move to the next one. Format the entry with timestamp and brief description of the change request."
+  }
+}

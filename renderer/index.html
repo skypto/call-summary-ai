@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com; img-src 'self' data:; media-src 'self' blob:; connect-src 'self' https://*.openai.azure.com https://api.openai.com https://*.api.cognitive.microsoft.com https://generativelanguage.googleapis.com https://api.deepseek.com;">
+    <title>Call Summary AI</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+</head>
+<body>
+    <!-- Skip Link for Accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <div class="app-container">
+        <!-- Enhanced Header -->
+        <header class="app-header" role="banner">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-microphone-lines" aria-hidden="true"></i>
+                    <h1>Call Summary AI</h1>
+                </div>
+                <div class="header-controls">
+                    <div class="status-indicator" id="statusIndicator" role="status" aria-live="polite">
+                        <span class="status-dot ready" aria-hidden="true"></span>
+                        <span class="status-text">Ready</span>
+                    </div>
+                    <!-- Theme toggle will be added by UI Manager -->
+                </div>
+            </div>
+        </header>
+
+        <!-- Enhanced Main Content -->
+        <main class="main-content">
+            <!-- Enhanced Sidebar Navigation -->
+            <nav class="sidebar" role="navigation" aria-label="Main navigation">
+                <div class="nav-tabs" role="tablist">
+                    <button class="nav-tab active focusable" data-tab="recording" role="tab" aria-selected="true" aria-controls="recording-tab" tabindex="0">
+                        <i class="fas fa-circle-dot" aria-hidden="true"></i>
+                        <span>Recording</span>
+                        <span class="keyboard-hint">Ctrl+1</span>
+                    </button>
+                    <button class="nav-tab focusable" data-tab="settings" role="tab" aria-selected="false" aria-controls="settings-tab" tabindex="-1">
+                        <i class="fas fa-sliders" aria-hidden="true"></i>
+                        <span>AI Settings</span>
+                        <span class="keyboard-hint">Ctrl+2</span>
+                    </button>
+                    <button class="nav-tab focusable" data-tab="history" role="tab" aria-selected="false" aria-controls="history-tab" tabindex="-1">
+                        <i class="fas fa-clock-rotate-left" aria-hidden="true"></i>
+                        <span>History</span>
+                        <span class="keyboard-hint">Ctrl+3</span>
+                    </button>
+                    <button class="nav-tab focusable" data-tab="templates" role="tab" aria-selected="false" aria-controls="templates-tab" tabindex="-1">
+                        <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
+                        <span>Templates</span>
+                        <span class="keyboard-hint">Ctrl+4</span>
+                    </button>
+                </div>
+            </nav>
+
+            <!-- Enhanced Content Area -->
+            <div class="content-area" id="main-content">
+                <!-- Recording Tab -->
+                <div class="tab-content active" id="recording-tab" role="tabpanel" aria-labelledby="recording-tab-button">
+                    <!-- Enhanced Audio Controls -->
+                    <section class="card" aria-labelledby="audio-controls-heading">
+                        <h2 id="audio-controls-heading">
+                            <i class="fas fa-microphone" aria-hidden="true"></i>
+                            Audio Controls
+                        </h2>
+                        <div class="audio-controls">
+                            <div class="device-selection">
+                                <div class="form-group">
+                                    <label for="inputDevice">Input Device (Microphone)</label>
+                                    <select id="inputDevice" class="form-control focusable" aria-describedby="input-device-help">
+                                        <option>Loading devices...</option>
+                                    </select>
+                                    <div id="input-device-help" class="form-help">Select your microphone for recording audio</div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="outputDevice">Output Device (Speakers)</label>
+                                    <select id="outputDevice" class="form-control focusable" aria-describedby="output-device-help">
+                                        <option>Loading devices...</option>
+                                    </select>
+                                    <div id="output-device-help" class="form-help">Select your speakers for audio playback</div>
+                                </div>
+                                <div class="device-actions">
+                                    <button id="refreshDevices" class="btn btn-secondary focusable" aria-label="Refresh audio devices">
+                                        <i class="fas fa-arrows-rotate" aria-hidden="true"></i>
+                                        <span>Refresh Devices</span>
+                                    </button>
+                                    <button id="requestPermission" class="btn btn-primary focusable" aria-label="Request microphone permission">
+                                        <i class="fas fa-microphone" aria-hidden="true"></i>
+                                        <span>Grant Permission</span>
+                                    </button>
+                                    <button id="testMicrophone" class="btn btn-outline focusable" aria-label="Test microphone">
+                                        <i class="fas fa-volume-high" aria-hidden="true"></i>
+                                        <span>Test Mic</span>
+                                    </button>
+                                    <button id="validateDevice" class="btn btn-outline focusable" aria-label="Validate device capabilities">
+                                        <i class="fas fa-circle-check" aria-hidden="true"></i>
+                                        <span>Validate</span>
+                                    </button>
+                                    <button id="showDebugInfo" class="btn btn-ghost focusable" aria-label="Show debug information">
+                                        <i class="fas fa-bug" aria-hidden="true"></i>
+                                        <span>Debug</span>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="recording-controls">
+                                <button id="recordButton" class="btn btn-primary record-btn focusable hover-lift" 
+                                        aria-describedby="record-help" 
+                                        data-action="toggle-recording"
+                                        aria-pressed="false">
+                                    <i class="fas fa-circle" aria-hidden="true"></i>
+                                    <span>Start Recording</span>
+                                    <span class="keyboard-hint">F9</span>
+                                </button>
+                                <div id="record-help" class="sr-only">Press F9 to start or stop recording</div>
+                                <div class="recording-info">
+                                    <div class="timer gradient-text" id="recordingTimer" aria-live="polite">00:00</div>
+                                    <div class="audio-level" role="meter" aria-label="Audio input level">
+                                        <label for="audioLevelBar">Audio Level</label>
+                                        <div class="level-meter">
+                                            <div class="level-bar" id="audioLevelBar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <div class="audio-level-info">
+                                            <span>Level:</span>
+                                            <span id="audioLevelText">0%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Recording Preview Section -->
+                    <section class="card recording-preview-section" id="recordingPreviewSection" style="display: none;">
+                        <div class="section-header">
+                            <h2><i class="fas fa-headphones"></i> Recording Preview</h2>
+                            <div class="preview-actions">
+                                <button id="saveRecordingBtn" class="btn btn-success">
+                                    <i class="fas fa-save"></i> Save to History
+                                </button>
+                                <button id="discardRecordingBtn" class="btn btn-outline">
+                                    <i class="fas fa-trash"></i> Discard
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="preview-content">
+                            <!-- Audio Player Section -->
+                            <div class="audio-player-section">
+                                <div class="audio-player">
+                                    <audio id="previewAudio" controls preload="metadata">
+                                        Your browser does not support the audio element.
+                                    </audio>
+                                    <div class="audio-waveform" id="audioWaveform">
+                                        <canvas id="waveformCanvas" width="400" height="60"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Recording Info and Filename -->
+                            <div class="preview-details">
+                                <div class="recording-info-grid">
+                                    <div class="info-item">
+                                        <label>Duration:</label>
+                                        <span id="previewDuration">--:--</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <label>File Size:</label>
+                                        <span id="previewFileSize">-- MB</span>
+                                    </div>
+
+                                </div>
+                                
+                                <div class="filename-section">
+                                    <label for="recordingFilename">Recording Name:</label>
+                                    <input type="text" id="recordingFilename" class="form-control" 
+                                           maxlength="100"
+                                           placeholder="Enter recording name (avoid: < > : \" / \\ | ? *)">
+                                    <small class="filename-help">This name will be used to save the recording to your call history</small>
+                                </div>
+                            </div>
+
+                            <!-- Transcription Section -->
+                            <div class="transcription-section" id="transcriptionSection" style="display: none;">
+                                <div class="transcription-header">
+                                    <h3><i class="fas fa-file-alt"></i> Transcription</h3>
+                                    <div class="transcription-actions">
+                                        <button id="startTranscription" class="btn btn-primary">
+                                            <i class="fas fa-play"></i> Start Transcription
+                                        </button>
+                                        <button id="retryTranscription" class="btn btn-secondary" style="display: none;">
+                                            <i class="fas fa-redo"></i> Retry
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Transcription Progress -->
+                                <div class="transcription-progress" id="transcriptionProgress" style="display: none;">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" id="transcriptionProgressFill"></div>
+                                    </div>
+                                    <div class="progress-text">
+                                        <span id="transcriptionStatus">Initializing transcription...</span>
+                                        <span id="transcriptionTime">--:--</span>
+                                    </div>
+                                    <div class="progress-actions">
+                                        <button id="cancelTranscription" class="btn btn-outline">
+                                            <i class="fas fa-times"></i> Cancel
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Transcription Result -->
+                                <div class="transcription-result" id="transcriptionResult" style="display: none;">
+                                    <!-- Transcript Toolbar -->
+                                    <div class="transcript-toolbar" id="transcriptToolbar" style="display: none;">
+                                        <div class="toolbar-section">
+                                            <button id="undoTranscript" class="btn btn-sm">
+                                                <i class="fas fa-undo"></i>
+                                            </button>
+                                            <button id="redoTranscript" class="btn btn-sm">
+                                                <i class="fas fa-redo"></i>
+                                            </button>
+                                        </div>
+                                        <div class="toolbar-section">
+                                            <button id="searchTranscript" class="btn btn-sm">
+                                                <i class="fas fa-search"></i>
+                                            </button>
+                                            <button id="replaceTranscript" class="btn btn-sm">
+                                                <i class="fas fa-exchange-alt"></i>
+                                            </button>
+                                        </div>
+                                        <div class="toolbar-section">
+                                            <button id="formatSpeakers" class="btn btn-sm">
+                                                <i class="fas fa-users"></i>
+                                            </button>
+                                            <button id="formatTimestamps" class="btn btn-sm">
+                                                <i class="fas fa-clock"></i>
+                                            </button>
+                                        </div>
+                                        <div class="toolbar-section">
+                                            <button id="transcriptStats" class="btn btn-sm">
+                                                <i class="fas fa-chart-bar"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Search Panel -->
+                                    <div class="search-panel" id="searchPanel" style="display: none;">
+                                        <div class="search-controls">
+                                            <input type="text" id="searchInput" class="search-input" placeholder="Search in transcript...">
+                                            <button id="searchNext" class="btn btn-sm">
+                                                <i class="fas fa-chevron-down"></i>
+                                            </button>
+                                            <button id="searchPrev" class="btn btn-sm">
+                                                <i class="fas fa-chevron-up"></i>
+                                            </button>
+                                            <button id="closeSearch" class="btn btn-sm">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                        <div class="search-options">
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" id="caseSensitive">
+                                                <span class="checkbox-custom"></span>
+                                                Case sensitive
+                                            </label>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" id="wholeWord">
+                                                <span class="checkbox-custom"></span>
+                                                Whole word
+                                            </label>
+                                            <label class="checkbox-label">
+                                                <input type="checkbox" id="useRegex">
+                                                <span class="checkbox-custom"></span>
+                                                Regex
+                                            </label>
+                                        </div>
+                                        <div class="search-results">
+                                            <span id="searchResultsText">No results</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Replace Panel -->
+                                    <div class="replace-panel" id="replacePanel" style="display: none;">
+                                        <div class="replace-controls">
+                                            <input type="text" id="replaceSearchInput" class="search-input" placeholder="Find...">
+                                            <input type="text" id="replaceInput" class="search-input" placeholder="Replace with...">
+                                            <button id="replaceNext" class="btn btn-sm">Replace</button>
+                                            <button id="replaceAll" class="btn btn-sm">Replace All</button>
+                                            <button id="closeReplace" class="btn btn-sm">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Transcript Content -->
+                                    <div class="transcript-content">
+                                        <textarea id="transcriptText" class="transcript-textarea" 
+                                                  placeholder="Transcription will appear here..." readonly></textarea>
+                                    </div>
+
+                                    <!-- Transcript Actions -->
+                                    <div class="transcript-actions">
+                                        <button id="editTranscript" class="btn btn-secondary">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                        <button id="saveTranscript" class="btn btn-success" style="display: none;">
+                                            <i class="fas fa-save"></i> Save
+                                        </button>
+                                        <button id="cancelEdit" class="btn btn-outline" style="display: none;">
+                                            <i class="fas fa-times"></i> Cancel
+                                        </button>
+                                        <button id="copyTranscript" class="btn btn-outline">
+                                            <i class="fas fa-copy"></i> Copy
+                                        </button>
+                                        <button id="exportTranscript" class="btn btn-outline">
+                                            <i class="fas fa-download"></i> Export
+                                        </button>
+                                    </div>
+
+                                    <!-- Export Modal -->
+                                    <div class="export-modal" id="exportModal" style="display: none;">
+                                        <div class="export-content">
+                                            <h4>Export Transcript</h4>
+                                            <div class="export-options">
+                                                <div class="form-group">
+                                                    <label>Format:</label>
+                                                    <select id="exportFormat" class="form-control">
+                                                        <option value="txt">Plain Text (.txt)</option>
+                                                        <option value="docx">Word Document (.docx)</option>
+                                                        <option value="pdf">PDF Document (.pdf)</option>
+                                                        <option value="json">JSON Data (.json)</option>
+                                                        <option value="srt">Subtitle File (.srt)</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="checkbox-label">
+                                                        <input type="checkbox" id="includeSpeakers" checked>
+                                                        <span class="checkbox-custom"></span>
+                                                        Include speaker names
+                                                    </label>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="checkbox-label">
+                                                        <input type="checkbox" id="includeTimestamps">
+                                                        <span class="checkbox-custom"></span>
+                                                        Include timestamps
+                                                    </label>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="checkbox-label">
+                                                        <input type="checkbox" id="includeMetadata" checked>
+                                                        <span class="checkbox-custom"></span>
+                                                        Include metadata
+                                                    </label>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="exportFilename">Filename:</label>
+                                                    <input type="text" id="exportFilename" class="form-control" placeholder="transcript">
+                                                </div>
+                                            </div>
+                                            <div class="export-actions">
+                                                <button id="confirmExport" class="btn btn-primary">Export</button>
+                                                <button id="cancelExport" class="btn btn-outline">Cancel</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Statistics Modal -->
+                                    <div class="stats-modal" id="statsModal" style="display: none;">
+                                        <div class="stats-content">
+                                            <h4>Transcript Statistics</h4>
+                                            <div class="stats-grid" id="statsGrid">
+                                                <!-- Statistics will be populated here -->
+                                            </div>
+                                            <div class="stats-actions">
+                                                <button id="closeStats" class="btn btn-outline">Close</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Transcription Error -->
+                                <div class="transcription-error" id="transcriptionError" style="display: none;">
+                                    <div class="error-content">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        <h4>Transcription Failed</h4>
+                                        <p id="transcriptionErrorMessage">An error occurred during transcription.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- AI Analysis Section -->
+                            <div class="ai-analysis-section" id="aiAnalysisSection" style="display: none;">
+                                <div class="analysis-header">
+                                    <h3><i class="fas fa-magic"></i> AI Analysis</h3>
+                                    <div class="analysis-actions">
+                                        <button id="manageTemplates" class="btn btn-secondary">
+                                            <i class="fas fa-cog"></i> Manage Templates
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Template Selection -->
+                                <div class="template-selection">
+                                    <div class="template-categories">
+                                        <button class="category-tab active" data-category="summary">
+                                            <i class="fas fa-file-alt"></i> Summary
+                                        </button>
+                                        <button class="category-tab" data-category="contacts">
+                                            <i class="fas fa-address-book"></i> Contacts
+                                        </button>
+                                        <button class="category-tab" data-category="actions">
+                                            <i class="fas fa-tasks"></i> Actions
+                                        </button>
+                                        <button class="category-tab" data-category="analysis">
+                                            <i class="fas fa-chart-line"></i> Analysis
+                                        </button>
+                                        <button class="category-tab" data-category="custom">
+                                            <i class="fas fa-user-edit"></i> Custom
+                                        </button>
+                                    </div>
+
+                                    <div class="template-grid" id="templateGrid">
+                                        <!-- Templates will be populated here -->
+                                    </div>
+                                </div>
+
+                                <!-- Analysis Results -->
+                                <div class="analysis-results" id="analysisResults" style="display: none;">
+                                    <div class="results-header">
+                                        <h4 id="resultsTitle">Analysis Results</h4>
+                                        <div class="results-actions">
+                                            <button id="copyResults" class="btn btn-outline">
+                                                <i class="fas fa-copy"></i> Copy
+                                            </button>
+                                            <button id="exportResults" class="btn btn-outline">
+                                                <i class="fas fa-download"></i> Export
+                                            </button>
+                                            <button id="clearResults" class="btn btn-outline">
+                                                <i class="fas fa-times"></i> Clear
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="results-content">
+                                        <div class="results-text" id="resultsText"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Analysis Progress -->
+                                <div class="analysis-progress" id="analysisProgress" style="display: none;">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" id="analysisProgressFill"></div>
+                                    </div>
+                                    <div class="progress-text">
+                                        <span id="analysisStatus">Processing analysis...</span>
+                                        <span id="analysisTime">--:--</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Q&A Interface -->
+                            <div class="qa-interface" id="qaInterface" style="display: none;">
+                                <div class="qa-header">
+                                    <h4><i class="fas fa-comments"></i> Ask Questions About This Recording</h4>
+                                    <div class="qa-actions">
+                                        <button id="exportConversation" class="btn btn-secondary">
+                                            <i class="fas fa-download"></i> Export
+                                        </button>
+                                        <button id="clearConversation" class="btn btn-outline">
+                                            <i class="fas fa-trash"></i> Clear Chat
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="qa-conversation" id="qaConversation">
+                                    <!-- Messages will be added here -->
+                                </div>
+
+                                <div class="qa-input-section">
+                                    <div class="suggested-questions" id="suggestedQuestions">
+                                        <div class="suggested-question" data-question="What were the main topics discussed?">
+                                            <i class="fas fa-lightbulb"></i> What were the main topics discussed?
+                                        </div>
+                                        <div class="suggested-question" data-question="Who were the participants?">
+                                            <i class="fas fa-users"></i> Who were the participants?
+                                        </div>
+                                        <div class="suggested-question" data-question="What action items were mentioned?">
+                                            <i class="fas fa-tasks"></i> What action items were mentioned?
+                                        </div>
+                                        <div class="suggested-question" data-question="Summarize the key decisions made">
+                                            <i class="fas fa-gavel"></i> Summarize the key decisions made
+                                        </div>
+                                    </div>
+
+                                    <div class="qa-input-container">
+                                        <input type="text" id="qaInput" class="qa-input" 
+                                               placeholder="Ask a question about this recording...">
+                                        <button id="sendQuestion" class="btn btn-primary qa-send-btn">
+                                            <i class="fas fa-paper-plane"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+
+                </div>
+
+                <!-- Settings Tab -->
+                <div class="tab-content" id="settings-tab">
+                    <!-- Transcription Settings -->
+                    <section class="card">
+                        <h2><i class="fas fa-microphone-alt"></i> Audio Transcription Settings</h2>
+                        
+                        <div class="provider-selection">
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="transcriptionProvider" value="azure-batch" checked>
+                                    <span class="radio-custom"></span>
+                                    <div class="provider-info">
+                                        <strong>Azure Batch Transcription</strong>
+                                        <small>High accuracy, speaker diarization, batch processing</small>
+                                    </div>
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="transcriptionProvider" value="openai-whisper">
+                                    <span class="radio-custom"></span>
+                                    <div class="provider-info">
+                                        <strong>OpenAI Whisper</strong>
+                                        <small>Fast, reliable, good for general transcription</small>
+                                    </div>
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="transcriptionProvider" value="azure-whisper">
+                                    <span class="radio-custom"></span>
+                                    <div class="provider-info">
+                                        <strong>Azure OpenAI Whisper</strong>
+                                        <small>Enterprise Whisper deployment</small>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Transcription Configuration Forms -->
+                        <div class="provider-config">
+                            <!-- Azure Batch Transcription Config -->
+                            <div class="config-form active" id="azure-batch-config">
+                                <div class="form-group">
+                                    <label for="azureSpeechKey">Speech Service Key:</label>
+                                    <input type="password" id="azureSpeechKey" class="form-control" 
+                                           placeholder="Your Azure Speech Service key"
+                                           autocomplete="off" spellcheck="false">
+                                </div>
+                                <div class="form-group">
+                                    <label for="azureSpeechRegion">Region:</label>
+                                    <select id="azureSpeechRegion" class="form-control">
+                                        <option value="eastus">East US</option>
+                                        <option value="westus2">West US 2</option>
+                                        <option value="westeurope">West Europe</option>
+                                        <option value="northeurope">North Europe</option>
+                                        <option value="southeastasia">Southeast Asia</option>
+                                        <option value="australiaeast">Australia East</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="azureSpeechLanguage">Language:</label>
+                                    <select id="azureSpeechLanguage" class="form-control">
+                                        <option value="en-US" selected>English (US)</option>
+                                        <option value="en-GB">English (UK)</option>
+                                        <option value="en-AU">English (Australia)</option>
+                                        <option value="en-CA">English (Canada)</option>
+                                        <option value="es-ES">Spanish (Spain)</option>
+                                        <option value="fr-FR">French (France)</option>
+                                        <option value="de-DE">German (Germany)</option>
+                                        <option value="it-IT">Italian (Italy)</option>
+                                        <option value="pt-BR">Portuguese (Brazil)</option>
+                                        <option value="ja-JP">Japanese</option>
+                                        <option value="ko-KR">Korean</option>
+                                        <option value="zh-CN">Chinese (Simplified)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="enableDiarization" checked>
+                                        <span class="checkbox-custom"></span>
+                                        Enable Speaker Diarization (identify different speakers)
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- OpenAI Whisper Config -->
+                            <div class="config-form" id="openai-whisper-config">
+                                <div class="form-group">
+                                    <label for="openaiWhisperKey">OpenAI API Key:</label>
+                                    <input type="password" id="openaiWhisperKey" class="form-control" 
+                                           placeholder="sk-..." autocomplete="off" spellcheck="false">
+                                </div>
+                                <div class="form-group">
+                                    <label for="whisperLanguage">Language (optional):</label>
+                                    <select id="whisperLanguage" class="form-control">
+                                        <option value="">Auto-detect</option>
+                                        <option value="en">English</option>
+                                        <option value="es">Spanish</option>
+                                        <option value="fr">French</option>
+                                        <option value="de">German</option>
+                                        <option value="it">Italian</option>
+                                        <option value="pt">Portuguese</option>
+                                        <option value="ja">Japanese</option>
+                                        <option value="ko">Korean</option>
+                                        <option value="zh">Chinese</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Azure Whisper Config -->
+                            <div class="config-form" id="azure-whisper-config">
+                                <div class="form-group">
+                                    <label for="azureWhisperKey">Azure OpenAI API Key:</label>
+                                    <input type="password" id="azureWhisperKey" class="form-control"
+                                           autocomplete="off" spellcheck="false">
+                                </div>
+                                <div class="form-group">
+                                    <label for="azureWhisperEndpoint">Endpoint:</label>
+                                    <input type="text" id="azureWhisperEndpoint" class="form-control" 
+                                           placeholder="https://your-resource.openai.azure.com/"
+                                           autocomplete="off" spellcheck="false">
+                                </div>
+                                <div class="form-group">
+                                    <label for="azureWhisperDeployment">Whisper Deployment Name:</label>
+                                    <input type="text" id="azureWhisperDeployment" class="form-control"
+                                           placeholder="whisper-deployment" autocomplete="off" spellcheck="false">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="config-actions">
+                            <button id="testTranscription" class="btn btn-primary">
+                                <i class="fas fa-microphone"></i> Test Transcription
+                            </button>
+                        </div>
+                    </section>
+
+                    <!-- Summarization Settings -->
+                    <section class="card">
+                        <h2><i class="fas fa-brain"></i> AI Summarization Settings</h2>
+                        
+                        <div class="provider-selection">
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="summaryProvider" value="openai" checked>
+                                    <span class="radio-custom"></span>
+                                    <div class="provider-info">
+                                        <strong>OpenAI</strong>
+                                        <small>GPT-4o-mini, GPT-4o - Best for structured summaries</small>
+                                    </div>
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="summaryProvider" value="azure-openai">
+                                    <span class="radio-custom"></span>
+                                    <div class="provider-info">
+                                        <strong>Azure OpenAI</strong>
+                                        <small>Enterprise deployment with data residency</small>
+                                    </div>
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="summaryProvider" value="gemini">
+                                    <span class="radio-custom"></span>
+                                    <div class="provider-info">
+                                        <strong>Google Gemini</strong>
+                                        <small>Gemini 1.5 Flash - Fast and cost-effective</small>
+                                    </div>
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="summaryProvider" value="deepseek">
+                                    <span class="radio-custom"></span>
+                                    <div class="provider-info">
+                                        <strong>DeepSeek</strong>
+                                        <small>High-quality reasoning at low cost</small>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Summarization Configuration Forms -->
+                        <div class="provider-config">
+                            <!-- OpenAI Config -->
+                            <div class="config-form active" id="openai-summary-config">
+                                <div class="form-group">
+                                    <label for="openaiSummaryKey">API Key:</label>
+                                    <input type="password" id="openaiSummaryKey" class="form-control" 
+                                           placeholder="sk-..." autocomplete="off" spellcheck="false">
+                                </div>
+                                <div class="form-group">
+                                    <label for="openaiSummaryModel">Model:</label>
+                                    <select id="openaiSummaryModel" class="form-control">
+                                        <option value="gpt-4o-mini" selected>GPT-4o-mini (Recommended)</option>
+                                        <option value="gpt-4o">GPT-4o</option>
+                                        <option value="gpt-3.5-turbo">GPT-3.5-turbo</option>
+                                        <option value="custom">Custom Model...</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" id="openaiCustomModelGroup" style="display: none;">
+                                    <label for="openaiCustomModel">Custom Model Name:</label>
+                                    <input type="text" id="openaiCustomModel" class="form-control" 
+                                           placeholder="Enter custom model name (e.g., gpt-4-turbo, gpt-4-0125-preview)"
+                                           autocomplete="off" spellcheck="false">
+                                    <small class="form-help">Enter the exact model name as supported by OpenAI API. Check OpenAI documentation for available models.</small>
+                                </div>
+                            </div>
+
+                            <!-- Azure OpenAI Config -->
+                            <div class="config-form" id="azure-openai-summary-config">
+                                <div class="form-group">
+                                    <label for="azureSummaryKey">API Key:</label>
+                                    <input type="password" id="azureSummaryKey" class="form-control"
+                                           autocomplete="off" spellcheck="false">
+                                </div>
+                                <div class="form-group">
+                                    <label for="azureSummaryEndpoint">Endpoint:</label>
+                                    <input type="text" id="azureSummaryEndpoint" class="form-control" 
+                                           placeholder="https://your-resource.openai.azure.com/"
+                                           autocomplete="off" spellcheck="false">
+                                </div>
+                                <div class="form-group">
+                                    <label for="azureSummaryDeployment">Deployment Name:</label>
+                                    <input type="text" id="azureSummaryDeployment" class="form-control"
+                                           placeholder="e.g., gpt-4o-deployment"
+                                           autocomplete="off" spellcheck="false">
+                                    <small class="form-help">This is the name of your deployed model in Azure OpenAI Studio. The deployment name determines which model is actually used.</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="azureSummaryModel">Model (Optional):</label>
+                                    <select id="azureSummaryModel" class="form-control">
+                                        <option value="" selected>Auto (use deployment model)</option>
+                                        <option value="gpt-4o">GPT-4o</option>
+                                        <option value="gpt-35-turbo">GPT-3.5-turbo</option>
+                                        <option value="gpt-4">GPT-4</option>
+                                        <option value="custom">Custom Model...</option>
+                                    </select>
+                                    <small class="form-help">Optional: Specify the model for documentation purposes. Azure OpenAI uses your deployment name to determine the actual model.</small>
+                                </div>
+                                <div class="form-group" id="azureCustomModelGroup" style="display: none;">
+                                    <label for="azureCustomModel">Custom Model Name:</label>
+                                    <input type="text" id="azureCustomModel" class="form-control" 
+                                           placeholder="Enter custom model name (e.g., gpt-4-turbo-2024-04-09)"
+                                           autocomplete="off" spellcheck="false">
+                                    <small class="form-help">Enter the exact model name for documentation. The deployment name still determines the actual model used.</small>
+                                </div>
+                            </div>
+
+                            <!-- Gemini Config -->
+                            <div class="config-form" id="gemini-summary-config">
+                                <div class="form-group">
+                                    <label for="geminiSummaryKey">API Key:</label>
+                                    <input type="password" id="geminiSummaryKey" class="form-control"
+                                           autocomplete="off" spellcheck="false">
+                                </div>
+                                <div class="form-group">
+                                    <label for="geminiSummaryModel">Model:</label>
+                                    <select id="geminiSummaryModel" class="form-control">
+                                        <option value="gemini-1.5-flash" selected>Gemini 1.5 Flash (Recommended)</option>
+                                        <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                                        <option value="gemini-pro">Gemini Pro</option>
+                                        <option value="custom">Custom Model...</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" id="geminiCustomModelGroup" style="display: none;">
+                                    <label for="geminiCustomModel">Custom Model Name:</label>
+                                    <input type="text" id="geminiCustomModel" class="form-control" 
+                                           placeholder="Enter custom model name (e.g., gemini-1.5-flash-001, gemini-1.5-pro-001)"
+                                           autocomplete="off" spellcheck="false">
+                                    <small class="form-help">Enter the exact model name as supported by Google AI API. Check Google AI documentation for available models.</small>
+                                </div>
+                            </div>
+
+                            <!-- DeepSeek Config -->
+                            <div class="config-form" id="deepseek-summary-config">
+                                <div class="form-group">
+                                    <label for="deepseekSummaryKey">API Key:</label>
+                                    <input type="password" id="deepseekSummaryKey" class="form-control"
+                                           placeholder="sk-..." autocomplete="off" spellcheck="false">
+                                </div>
+                                <div class="form-group">
+                                    <label for="deepseekSummaryModel">Model:</label>
+                                    <select id="deepseekSummaryModel" class="form-control">
+                                        <option value="deepseek-chat" selected>DeepSeek Chat</option>
+                                        <option value="deepseek-coder">DeepSeek Coder</option>
+                                        <option value="custom">Custom Model...</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" id="deepseekCustomModelGroup" style="display: none;">
+                                    <label for="deepseekCustomModel">Custom Model Name:</label>
+                                    <input type="text" id="deepseekCustomModel" class="form-control" 
+                                           placeholder="Enter custom model name (e.g., deepseek-v2, deepseek-chat-v2)"
+                                           autocomplete="off" spellcheck="false">
+                                    <small class="form-help">Enter the exact model name as supported by DeepSeek API. Check DeepSeek documentation for available models.</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="deepseekEndpoint">Endpoint (optional):</label>
+                                    <input type="text" id="deepseekEndpoint" class="form-control" 
+                                           placeholder="https://api.deepseek.com/v1"
+                                           value="https://api.deepseek.com/v1"
+                                           autocomplete="off" spellcheck="false">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="config-actions">
+                            <button id="testSummarization" class="btn btn-primary">
+                                <i class="fas fa-brain"></i> Test Summarization
+                            </button>
+                        </div>
+                    </section>
+
+                    <!-- Global Actions -->
+                    <section class="card">
+                        <h2><i class="fas fa-cog"></i> Configuration Management</h2>
+                        <div class="config-actions">
+                            <button id="saveAllConfig" class="btn btn-success">
+                                <i class="fas fa-save"></i> Save All Settings
+                            </button>
+                            <button id="loadAllConfig" class="btn btn-secondary">
+                                <i class="fas fa-folder-open"></i> Load Configuration
+                            </button>
+                            <button id="exportConfig" class="btn btn-outline">
+                                <i class="fas fa-download"></i> Export Settings
+                            </button>
+                            <button id="resetConfig" class="btn btn-outline">
+                                <i class="fas fa-undo"></i> Reset to Defaults
+                            </button>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- History Tab -->
+                <div class="tab-content" id="history-tab">
+                    <section class="card">
+                        <div class="section-header">
+                            <h2><i class="fas fa-history"></i> Call History</h2>
+                            <div class="history-actions">
+                                <button id="exportHistory" class="btn btn-secondary">
+                                    <i class="fas fa-download"></i> Export CSV
+                                </button>
+                                <button id="exportAllAudio" class="btn btn-success">
+                                    <i class="fas fa-file-audio"></i> Export All Audio
+                                </button>
+                                <button id="clearHistory" class="btn btn-outline">
+                                    <i class="fas fa-trash"></i> Clear All
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Search and Filter Controls -->
+                        <div class="history-controls">
+                            <div class="search-section">
+                                <div class="search-input-group">
+                                    <input type="text" id="historySearch" class="form-control search-input" 
+                                           placeholder="Search recordings by name, date, or transcript content..." 
+                                           aria-label="Search recordings">
+                                    <button id="clearSearch" class="btn btn-outline search-clear" 
+                                            aria-label="Clear search">
+                                        <i class="fas fa-times" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                                <div class="search-stats" id="searchStats">
+                                    <!-- Search statistics will be displayed here -->
+                                </div>
+                            </div>
+                            
+                            <div class="filter-section">
+                                <div class="filter-group">
+                                    <label for="historyFilter" class="filter-label">Filter:</label>
+                                    <select id="historyFilter" class="form-control filter-select" aria-label="Filter recordings">
+                                        <option value="all">All Recordings</option>
+                                        <option value="transcribed">Transcribed</option>
+                                        <option value="not-transcribed">Not Transcribed</option>
+                                        <option value="analyzed">Analyzed</option>
+                                        <option value="not-analyzed">Not Analyzed</option>
+                                        <option value="today">Today</option>
+                                        <option value="this-week">This Week</option>
+                                        <option value="this-month">This Month</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="filter-group">
+                                    <label for="historySort" class="filter-label">Sort by:</label>
+                                    <select id="historySort" class="form-control filter-select" aria-label="Sort recordings">
+                                        <option value="date-desc" selected>Date (Newest First)</option>
+                                        <option value="date-asc">Date (Oldest First)</option>
+                                        <option value="name-asc">Name (A-Z)</option>
+                                        <option value="name-desc">Name (Z-A)</option>
+                                        <option value="duration-desc">Duration (Longest First)</option>
+                                        <option value="duration-asc">Duration (Shortest First)</option>
+                                        <option value="size-desc">Size (Largest First)</option>
+                                        <option value="size-asc">Size (Smallest First)</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="filter-group">
+                                    <label for="itemsPerPage" class="filter-label">Show:</label>
+                                    <select id="itemsPerPage" class="form-control filter-select" aria-label="Items per page">
+                                        <option value="5">5 per page</option>
+                                        <option value="10" selected>10 per page</option>
+                                        <option value="20">20 per page</option>
+                                        <option value="50">50 per page</option>
+                                        <option value="100">100 per page</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="section-help">
+                            <small><i class="fas fa-info-circle"></i> Use the download button on each recording to export individual audio files, or "Export All Audio" to save all recordings to a folder.</small>
+                        </div>
+                        
+                        <div class="history-content">
+                            <div class="history-list" id="historyList">
+                                <div class="empty-state">
+                                    <i class="fas fa-phone-slash"></i>
+                                    <p>No call recordings yet</p>
+                                    <small>Start recording to see your call history here</small>
+                                </div>
+                            </div>
+                            
+                            <!-- Pagination Controls -->
+                            <div class="pagination-container" id="historyPagination">
+                                <!-- Pagination will be generated here -->
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Templates Tab -->
+                <div class="tab-content" id="templates-tab">
+                    <section class="card">
+                        <div class="section-header">
+                            <h2><i class="fas fa-magic"></i> Prompt Templates</h2>
+                            <div class="template-actions">
+                                <button id="createNewTemplate" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> Create New Template
+                                </button>
+                                <div class="template-actions-dropdown">
+                                    <button id="templateActionsDropdown" class="btn btn-secondary dropdown-toggle">
+                                        <i class="fas fa-cog"></i> More Actions
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="dropdown-menu" id="templateActionsMenu" style="display: none;">
+                                        <button class="dropdown-item" id="importTemplates">
+                                            <i class="fas fa-upload"></i> Import Templates
+                                        </button>
+                                        <button class="dropdown-item" id="exportAllTemplates">
+                                            <i class="fas fa-download"></i> Export All Templates
+                                        </button>
+                                        <button class="dropdown-item" id="manageTemplates">
+                                            <i class="fas fa-list"></i> Manage Templates
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="template-preview-content" style="padding: 1.5rem;">
+                            <p class="template-description" style="margin-bottom: 2rem; color: var(--text-secondary); line-height: 1.6;">
+                                Prompt templates allow you to quickly analyze transcripts with pre-built AI prompts. 
+                                Create custom templates for your specific needs or use the built-in templates for common analysis tasks.
+                            </p>
+                            
+                            <!-- Template Categories Preview -->
+                            <div class="template-categories-preview">
+                                <div class="template-categories">
+                                    <button class="category-tab active" data-category="summary">
+                                        <i class="fas fa-file-alt"></i> Summary
+                                    </button>
+                                    <button class="category-tab" data-category="contacts">
+                                        <i class="fas fa-address-book"></i> Contacts
+                                    </button>
+                                    <button class="category-tab" data-category="actions">
+                                        <i class="fas fa-tasks"></i> Actions
+                                    </button>
+                                    <button class="category-tab" data-category="analysis">
+                                        <i class="fas fa-chart-line"></i> Analysis
+                                    </button>
+                                    <button class="category-tab" data-category="custom">
+                                        <i class="fas fa-user-edit"></i> Custom
+                                    </button>
+                                </div>
+
+                                <div class="template-grid" id="templateGridPreview">
+                                    <!-- Templates will be populated here -->
+                                </div>
+                            </div>
+                            
+                            <div class="template-usage-info" style="margin-top: 2rem; padding: 1.5rem; background: var(--surface-hover); border-radius: var(--radius);">
+                                <h3 style="margin: 0 0 1rem 0; color: var(--text-primary);">How to Use Templates:</h3>
+                                <ol style="margin: 0; padding-left: 1.5rem; color: var(--text-secondary); line-height: 1.6;">
+                                    <li><strong>Record & Transcribe:</strong> Create a recording and generate a transcript</li>
+                                    <li><strong>Select Template:</strong> Choose from available templates or create your own</li>
+                                    <li><strong>AI Analysis:</strong> The template will be applied to your transcript automatically</li>
+                                    <li><strong>Review Results:</strong> Get structured insights based on the template</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+
+
+    <!-- Recording Detail Modal -->
+    <div class="modal-overlay" id="recordingDetailModal">
+        <div class="modal-content recording-detail">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-audio"></i> <span id="detailRecordingName">Recording Details</span></h2>
+                <button class="modal-close" id="closeDetailModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <!-- Recording Info -->
+                <div class="detail-section">
+                    <h3>Recording Information</h3>
+                    <div class="detail-info-grid">
+                        <div class="detail-item">
+                            <label>Date:</label>
+                            <span id="detailDate">--</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Duration:</label>
+                            <span id="detailDuration">--:--</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>File Size:</label>
+                            <span id="detailFileSize">-- MB</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Quality:</label>
+                            <span id="detailQuality">-- kHz, --</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Audio Player -->
+                <div class="detail-section">
+                    <h3>Audio Playback</h3>
+                    <div class="detail-audio-player">
+                        <audio id="detailAudio" controls preload="metadata">
+                            Your browser does not support the audio element.
+                        </audio>
+                        <div class="audio-controls-extra">
+                            <button id="detailPlayPause" class="btn btn-primary">
+                                <i class="fas fa-play"></i> Play
+                            </button>
+                            <span class="audio-time">
+                                <span id="detailCurrentTime">0:00</span> / <span id="detailTotalTime">0:00</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transcription Section -->
+                <div class="detail-section">
+                    <div class="section-header-inline">
+                        <h3>Transcription</h3>
+                        <div class="transcription-status" id="detailTranscriptionStatus">
+                            <span class="status-badge" id="detailStatusBadge">Not Available</span>
+                        </div>
+                    </div>
+                    
+                    <!-- No Transcription State -->
+                    <div class="no-transcription" id="detailNoTranscription">
+                        <p>This recording has not been transcribed yet.</p>
+                        <button id="detailStartTranscription" class="btn btn-primary">
+                            <i class="fas fa-play"></i> Start Transcription
+                        </button>
+                    </div>
+
+                    <!-- Transcription Progress -->
+                    <div class="transcription-progress" id="detailTranscriptionProgress" style="display: none;">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="detailProgressFill"></div>
+                        </div>
+                        <div class="progress-text">
+                            <span id="detailProgressStatus">Processing...</span>
+                            <span id="detailProgressTime">--:--</span>
+                        </div>
+                    </div>
+
+                    <!-- Transcription Result -->
+                    <div class="transcription-result" id="detailTranscriptionResult" style="display: none;">
+                        <div class="transcript-content">
+                            <textarea id="detailTranscriptText" class="transcript-textarea" 
+                                      placeholder="Transcription will appear here..." readonly></textarea>
+                        </div>
+                        <div class="transcript-actions">
+                            <button id="detailEditTranscript" class="btn btn-secondary">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button id="detailCopyTranscript" class="btn btn-outline">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                            <button id="detailExportTranscript" class="btn btn-outline">
+                                <i class="fas fa-download"></i> Export
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Transcription Error -->
+                    <div class="transcription-error" id="detailTranscriptionError" style="display: none;">
+                        <div class="error-content">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h4>Transcription Failed</h4>
+                            <p id="detailErrorMessage">An error occurred during transcription.</p>
+                            <button id="detailRetryTranscription" class="btn btn-primary">
+                                <i class="fas fa-redo"></i> Retry Transcription
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Analysis Section for Detail Modal -->
+                <div class="detail-section" id="detailAiAnalysisSection" style="display: none;">
+                    <div class="section-header-inline">
+                        <h3><i class="fas fa-magic"></i> AI Analysis</h3>
+                        <div class="analysis-actions">
+                            <button id="detailManageTemplates" class="btn btn-secondary">
+                                <i class="fas fa-cog"></i> Manage Templates
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Template Selection -->
+                    <div class="template-selection">
+                        <div class="template-categories">
+                            <button class="category-tab active" data-category="summary">
+                                <i class="fas fa-file-alt"></i> Summary
+                            </button>
+                            <button class="category-tab" data-category="contacts">
+                                <i class="fas fa-address-book"></i> Contacts
+                            </button>
+                            <button class="category-tab" data-category="actions">
+                                <i class="fas fa-tasks"></i> Actions
+                            </button>
+                            <button class="category-tab" data-category="analysis">
+                                <i class="fas fa-chart-line"></i> Analysis
+                            </button>
+                            <button class="category-tab" data-category="custom">
+                                <i class="fas fa-user-edit"></i> Custom
+                            </button>
+                        </div>
+
+                        <div class="template-grid" id="detailTemplateGrid">
+                            <!-- Templates will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Analysis Results -->
+                    <div class="analysis-results" id="detailAnalysisResults" style="display: none;">
+                        <div class="results-header">
+                            <h4 id="detailResultsTitle">Analysis Results</h4>
+                            <div class="results-actions">
+                                <button id="detailCopyResults" class="btn btn-outline">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                                <button id="detailExportResults" class="btn btn-outline">
+                                    <i class="fas fa-download"></i> Export
+                                </button>
+                                <button id="detailClearResults" class="btn btn-outline">
+                                    <i class="fas fa-times"></i> Clear
+                                </button>
+                            </div>
+                        </div>
+                        <div class="results-content">
+                            <div class="results-text" id="detailResultsText"></div>
+                        </div>
+                    </div>
+
+                    <!-- Analysis Progress -->
+                    <div class="analysis-progress" id="detailAnalysisProgress" style="display: none;">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="detailAnalysisProgressFill"></div>
+                        </div>
+                        <div class="progress-text">
+                            <span id="detailAnalysisStatus">Processing analysis...</span>
+                            <span id="detailAnalysisTime">--:--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Q&A Interface for Detail Modal -->
+                <div class="detail-section" id="detailQaInterface" style="display: none;">
+                    <div class="section-header-inline">
+                        <h3><i class="fas fa-comments"></i> Ask Questions</h3>
+                        <div class="qa-actions">
+                            <button id="detailExportConversation" class="btn btn-secondary">
+                                <i class="fas fa-download"></i> Export
+                            </button>
+                            <button id="detailClearConversation" class="btn btn-outline">
+                                <i class="fas fa-trash"></i> Clear Chat
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="qa-conversation" id="detailQaConversation">
+                        <!-- Messages will be added here -->
+                    </div>
+
+                    <div class="qa-input-section">
+                        <div class="suggested-questions" id="detailSuggestedQuestions">
+                            <div class="suggested-question" data-question="What were the main topics discussed?">
+                                <i class="fas fa-lightbulb"></i> What were the main topics discussed?
+                            </div>
+                            <div class="suggested-question" data-question="Who were the participants?">
+                                <i class="fas fa-users"></i> Who were the participants?
+                            </div>
+                            <div class="suggested-question" data-question="What action items were mentioned?">
+                                <i class="fas fa-tasks"></i> What action items were mentioned?
+                            </div>
+                            <div class="suggested-question" data-question="Summarize the key decisions made">
+                                <i class="fas fa-gavel"></i> Summarize the key decisions made
+                            </div>
+                        </div>
+
+                        <div class="qa-input-container">
+                            <input type="text" id="detailQaInput" class="qa-input" 
+                                   placeholder="Ask a question about this recording...">
+                            <button id="detailSendQuestion" class="btn btn-primary qa-send-btn">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button id="detailExportAudio" class="btn btn-success">
+                    <i class="fas fa-download"></i> Export Audio
+                </button>
+                <button id="detailDeleteRecording" class="btn btn-outline">
+                    <i class="fas fa-trash"></i> Delete Recording
+                </button>
+                <button id="detailCloseModal" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template Management Modal -->
+    <div class="modal-overlay" id="templateManagementModal">
+        <div class="modal-content template-management">
+            <div class="modal-header">
+                <h2><i class="fas fa-cog"></i> Manage Templates</h2>
+                <button class="modal-close" id="closeTemplateModal" onclick="templateManager.closeTemplateManagement()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="template-management-tabs">
+                    <button class="tab-btn active" data-tab="browse">
+                        <i class="fas fa-list"></i> Browse Templates
+                    </button>
+                    <button class="tab-btn" data-tab="create">
+                        <i class="fas fa-plus"></i> Create Template
+                    </button>
+                    <button class="tab-btn" data-tab="import">
+                        <i class="fas fa-upload"></i> Import/Export
+                    </button>
+                </div>
+
+                <!-- Browse Templates Tab -->
+                <div class="tab-content active" id="browseTemplatesTab">
+                    <div class="template-list" id="templateManagementList">
+                        <!-- Template list will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Create Template Tab -->
+                <div class="tab-content" id="createTemplateTab">
+                    <form id="templateForm">
+                        <div class="form-group">
+                            <label for="templateName">Template Name:</label>
+                            <input type="text" id="templateName" class="form-control" 
+                                   placeholder="Enter template name..." required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="templateCategory">Category:</label>
+                            <select id="templateCategory" class="form-control" required>
+                                <option value="summary">Summary</option>
+                                <option value="contacts">Contacts</option>
+                                <option value="actions">Actions</option>
+                                <option value="analysis">Analysis</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="templateDescription">Description:</label>
+                            <input type="text" id="templateDescription" class="form-control" 
+                                   placeholder="Brief description of what this template does...">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="templatePrompt">Prompt Template:</label>
+                            <textarea id="templatePrompt" class="form-control template-prompt-textarea" 
+                                      placeholder="Enter your prompt template here. Use {transcript} to include the transcript text, {date} for date, {duration} for duration..." 
+                                      required></textarea>
+                            <small class="form-help">
+                                Available variables: {transcript}, {date}, {duration}, {filename}
+                            </small>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" id="previewTemplate" class="btn btn-secondary">
+                                <i class="fas fa-eye"></i> Preview
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Template
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Import/Export Tab -->
+                <div class="tab-content" id="importTemplatesTab">
+                    <div class="form-group">
+                        <label>Export Templates:</label>
+                        <button id="exportTemplates" class="btn btn-primary">
+                            <i class="fas fa-download"></i> Export All Templates
+                        </button>
+                        <small class="form-help">Download all your templates as a JSON file for backup or sharing.</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="importTemplates">Import Templates:</label>
+                        <input type="file" id="importTemplates" accept=".json" class="form-control">
+                        <small class="form-help">Select a JSON file containing template definitions to import.</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Reset Templates:</label>
+                        <button id="resetTemplates" class="btn btn-danger">
+                            <i class="fas fa-undo"></i> Reset to Default Templates
+                        </button>
+                        <small class="form-help">This will restore the default template library and remove all custom templates.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p id="loadingText">Processing...</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="audio.js"></script>
+    <script src="transcription-service.js"></script>
+    <script src="progress-manager.js"></script>
+    <script src="transcript-manager.js"></script>
+    <script src="template-manager.js"></script>
+    <script src="template-processor.js"></script>
+    <script src="analysis-results.js"></script>
+    <script src="ai.js"></script>
+    <script src="ui-manager.js"></script>
+    <script src="help-system.js"></script>
+    <script src="help-content.js"></script>
+    <script src="accessibility-enhancer.js"></script>
+    <script src="history-manager.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

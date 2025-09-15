@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Call Summary AI - Live Demo</title>
+    <link rel="stylesheet" href="demo-styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="demo-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>📞 Call Summary AI</h1>
+                    <span class="tagline">Transform calls into insights in minutes</span>
+                </div>
+                <div class="header-actions">
+                    <a href="#download" class="btn btn-primary">Download Desktop App</a>
+                    <a href="#demo" class="btn btn-secondary">Try Demo</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h2>Stop Wasting Hours on Call Documentation</h2>
+                <p class="hero-subtitle">Professional desktop application that transforms 2+ hours of manual work into 3 minutes of AI-powered insights</p>
+                
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-number">2+ Hours</span>
+                        <span class="stat-label">Saved per call</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">7 AI</span>
+                        <span class="stat-label">Providers supported</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">100%</span>
+                        <span class="stat-label">Local & secure</span>
+                    </div>
+                </div>
+
+                <div class="hero-video">
+                    <div class="video-placeholder">
+                        <div class="play-button" onclick="playDemo()">
+                            <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+                                <circle cx="30" cy="30" r="30" fill="rgba(59, 130, 246, 0.1)"/>
+                                <path d="M25 20L40 30L25 40V20Z" fill="#3b82f6"/>
+                            </svg>
+                        </div>
+                        <p>▶️ Watch 3-minute demo</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Demo -->
+    <section id="demo" class="demo-section">
+        <div class="container">
+            <h2>Interactive Demo</h2>
+            <p>Experience the workflow without installing anything</p>
+            
+            <div class="demo-app">
+                <div class="demo-sidebar">
+                    <div class="demo-nav">
+                        <button class="nav-item active" data-tab="recording">🎙️ Recording</button>
+                        <button class="nav-item" data-tab="transcription">📝 Transcription</button>
+                        <button class="nav-item" data-tab="analysis">🧠 Analysis</button>
+                        <button class="nav-item" data-tab="history">📚 History</button>
+                    </div>
+                </div>
+                
+                <div class="demo-content">
+                    <!-- Recording Tab -->
+                    <div class="demo-tab active" id="recording-tab">
+                        <div class="recording-interface">
+                            <div class="device-selector">
+                                <label>Microphone:</label>
+                                <select>
+                                    <option>MacBook Pro Microphone</option>
+                                    <option>External USB Mic</option>
+                                </select>
+                            </div>
+                            
+                            <div class="recording-controls">
+                                <button class="record-btn" onclick="toggleRecording()">
+                                    <span class="record-icon">⏺️</span>
+                                    <span class="record-text">Start Recording</span>
+                                </button>
+                            </div>
+                            
+                            <div class="audio-visualization">
+                                <canvas id="waveform" width="400" height="100"></canvas>
+                                <div class="recording-timer">00:00</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Transcription Tab -->
+                    <div class="demo-tab" id="transcription-tab">
+                        <div class="provider-selector">
+                            <label>AI Provider:</label>
+                            <select>
+                                <option>OpenAI Whisper</option>
+                                <option>Azure Speech Services</option>
+                                <option>Google Speech-to-Text</option>
+                            </select>
+                        </div>
+                        
+                        <div class="transcription-result">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 85%"></div>
+                            </div>
+                            <div class="transcript-text">
+                                <p><strong>Speaker 1:</strong> Thanks for joining today's call. Let's discuss the Q4 strategy and key action items.</p>
+                                <p><strong>Speaker 2:</strong> Absolutely. I've prepared the market analysis we discussed. The main opportunities are...</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Analysis Tab -->
+                    <div class="demo-tab" id="analysis-tab">
+                        <div class="template-selector">
+                            <label>Analysis Template:</label>
+                            <select>
+                                <option>Meeting Summary</option>
+                                <option>Action Items</option>
+                                <option>Contact Extraction</option>
+                                <option>Sentiment Analysis</option>
+                            </select>
+                        </div>
+                        
+                        <div class="analysis-result">
+                            <h3>📋 Meeting Summary</h3>
+                            <div class="summary-content">
+                                <h4>Key Topics Discussed:</h4>
+                                <ul>
+                                    <li>Q4 strategy planning and market opportunities</li>
+                                    <li>Budget allocation for new initiatives</li>
+                                    <li>Team restructuring and hiring plans</li>
+                                </ul>
+                                
+                                <h4>Action Items:</h4>
+                                <ul>
+                                    <li>📅 Schedule follow-up meeting for next week</li>
+                                    <li>📊 Prepare detailed budget proposal by Friday</li>
+                                    <li>👥 Interview candidates for senior positions</li>
+                                </ul>
+                                
+                                <h4>Next Steps:</h4>
+                                <p>Team to reconvene next Tuesday to finalize Q4 strategy and begin implementation planning.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- History Tab -->
+                    <div class="demo-tab" id="history-tab">
+                        <div class="history-controls">
+                            <input type="search" placeholder="Search recordings..." class="search-input">
+                            <select class="filter-select">
+                                <option>All recordings</option>
+                                <option>This week</option>
+                                <option>This month</option>
+                            </select>
+                        </div>
+                        
+                        <div class="recordings-list">
+                            <div class="recording-item">
+                                <div class="recording-info">
+                                    <h4>Client Strategy Call</h4>
+                                    <p>Dec 19, 2024 • 45:32 • Transcribed</p>
+                                </div>
+                                <div class="recording-actions">
+                                    <button class="btn-small">▶️ Play</button>
+                                    <button class="btn-small">📄 View</button>
+                                </div>
+                            </div>
+                            
+                            <div class="recording-item">
+                                <div class="recording-info">
+                                    <h4>Team Standup</h4>
+                                    <p>Dec 18, 2024 • 23:15 • Analyzed</p>
+                                </div>
+                                <div class="recording-actions">
+                                    <button class="btn-small">▶️ Play</button>
+                                    <button class="btn-small">📄 View</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features">
+        <div class="container">
+            <h2>Built with Kiro AI-Powered Development</h2>
+            <div class="features-grid">
+                <div class="feature">
+                    <div class="feature-icon">📋</div>
+                    <h3>Spec-Driven Development</h3>
+                    <p>Used Kiro's specification system to plan 40+ tasks across 10 major functional areas</p>
+                </div>
+                
+                <div class="feature">
+                    <div class="feature-icon">🔄</div>
+                    <h3>Automated Workflows</h3>
+                    <p>Custom Kiro hook tracked 25+ change requests automatically during development</p>
+                </div>
+                
+                <div class="feature">
+                    <div class="feature-icon">⚡</div>
+                    <h3>AI Code Generation</h3>
+                    <p>2000+ lines of production code generated through Kiro collaboration</p>
+                </div>
+                
+                <div class="feature">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Multi-AI Integration</h3>
+                    <p>Seamlessly supports 7 AI providers with unified interface</p>
+                </div>
+                
+                <div class="feature">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Privacy First</h3>
+                    <p>All data stored locally with encrypted security</p>
+                </div>
+                
+                <div class="feature">
+                    <div class="feature-icon">♿</div>
+                    <h3>Accessibility</h3>
+                    <p>Full keyboard navigation and screen reader support</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download Section -->
+    <section id="download" class="download-section">
+        <div class="container">
+            <h2>Download Call Summary AI</h2>
+            <p>Professional desktop application for Windows, macOS, and Linux</p>
+            
+            <div class="download-grid">
+                <div class="download-option">
+                    <div class="os-icon">🪟</div>
+                    <h3>Windows</h3>
+                    <p>Windows 10/11 (x64)</p>
+                    <a href="#" class="btn btn-primary">Download .exe</a>
+                    <a href="#" class="btn btn-secondary">Portable</a>
+                </div>
+                
+                <div class="download-option">
+                    <div class="os-icon">🍎</div>
+                    <h3>macOS</h3>
+                    <p>macOS 10.15+ (Intel/Apple Silicon)</p>
+                    <a href="#" class="btn btn-primary">Download .dmg</a>
+                    <a href="#" class="btn btn-secondary">Zip</a>
+                </div>
+                
+                <div class="download-option">
+                    <div class="os-icon">🐧</div>
+                    <h3>Linux</h3>
+                    <p>Ubuntu 18.04+ (x64)</p>
+                    <a href="#" class="btn btn-primary">Download .AppImage</a>
+                    <a href="#" class="btn btn-secondary">.deb</a>
+                </div>
+            </div>
+            
+            <div class="github-link">
+                <p>Open source on <a href="#">GitHub</a> • Built with ❤️ using Kiro</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Call Summary AI. Built for the Kiro Hackathon.</p>
+        </div>
+    </footer>
+
+    <script src="demo-script.js"></script>
+</body>
+</html>
